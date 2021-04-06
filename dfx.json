@@ -1,0 +1,34 @@
+{
+  "canisters": {
+    "ads_ledger": {
+      "main": "src/ads_ledger/main.mo",
+      "type": "motoko"
+    },
+    "didjs": {
+      "type": "custom",
+      "candid": "src/didjs/didjs.did",
+      "wasm": "target/wasm32-unknown-unknown/release/didjs_opt.wasm",
+      "build": [
+        "cargo build --target wasm32-unknown-unknown --release --package didjs",
+        "wasm-opt --strip-debug -Oz target/wasm32-unknown-unknown/release/didjs.wasm -o target/wasm32-unknown-unknown/release/didjs_opt.wasm"
+      ]
+    },
+    "www": {
+      "dependencies": ["didjs"],
+      "frontend": {
+        "entrypoint": "src/www/index.js"
+      },
+      "source": [
+        "dist/www/"
+      ],
+      "type": "assets"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
