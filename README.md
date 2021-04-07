@@ -6,7 +6,6 @@ So far this is made up of three canisters:
 
 * `ads_ledger`: Place where ads are stored and retrieved from
 * `www`: Web interface to manage ads (currently unmodified [Candid UI](https://github.com/dfinity/candid/tree/master/tools/ui))
-* `didjs`: Support canister for Candid UI that converts Candid declaration files (.did) into JavaScript
 
 ## Build
 
