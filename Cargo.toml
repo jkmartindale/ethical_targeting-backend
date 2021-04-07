@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "src/didjs",
+    "src/www",
 ]
 
 [profile.release]

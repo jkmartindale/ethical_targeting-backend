@@ -14,6 +14,7 @@ canister_ids.json
 # frontend code
 dist/
 node_modules/
+ts-out/
 
 # Rust outputs
 target/
