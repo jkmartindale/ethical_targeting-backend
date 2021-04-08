@@ -217,10 +217,20 @@ actor AdsLedger {
     /// Next available `Ad` id
     ///
     /// TODO: Could this be subject to race conditions? Docs unclear on when race conditions are possible
-    var nextID : AdID = 0;
+    stable var nextID : AdID = 0;
 
-    /// Ad repository
-    var ads = TrieMap.TrieMap<AdID, Ad>(equalID, hashID);    
+    /// Ad repository backup used during canister code upgrades
+    stable var adsBackup : [(AdID, Ad)] = [];
+    /// Ad repository used during runtime
+    var ads = TrieMap.fromEntries(adsBackup.vals(), equalID, hashID);
+
+    system func preupgrade() {
+        adsBackup := Iter.toArray(ads.entries());
+    };
+
+    system func postupgrade() {
+        adsBackup := [];
+    };
 
     /**
      * "API" I guess
