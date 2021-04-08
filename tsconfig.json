@@ -9,10 +9,11 @@
     "lib": ["dom", "es2017"],
     "module": "commonjs",
     "outDir": "ts-out/",
+    "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
     "target": "ES2017"
   },
-  "include": ["src/**/*.ts", "src/**/*.css"],
+  "include": ["src/**/*.ts", "src/**/*.css", "canister_ids.json"],
   "exclude": ["**/*.test.ts"]
 }

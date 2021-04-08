@@ -34,22 +34,12 @@
 #container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--header-height));
+  height: 100vh;
 }
 
 #main-content {
   flex: 1;
   overflow: auto;
-}
-
-#header {
-  height: var(--header-height);
-  width: 100%;
-  text-align: center;
-  font-size: var(--font-md);
-  line-height: var(--header-height);
-  color: var(--darkest);
-  border-bottom: 1px solid var(--dark);
 }
 
 #title-card {
@@ -332,11 +322,6 @@ textarea:focus {
     --console-width: clamp(28rem, 30vw, 40rem);
   }
 
-  #header {
-    text-align: left;
-    padding-left: 3rem;
-  }
-
   #container {
     flex-direction: row;
     overflow: auto;
@@ -372,13 +357,13 @@ textarea:focus {
     display: flex;
     flex-direction: row-reverse;
     width: var(--header-height);
-    height: calc(100vh - var(--header-height));
+    height: 100vh;
     padding: 0;
     transition: width 0.2s ease-in-out;
   }
   #console.open {
     width: calc(var(--header-height) + var(--console-width));
-    height: calc(100vh - var(--header-height));
+    height: 100vh;
   }
 
   #console-bar {
@@ -427,6 +412,6 @@ textarea:focus {
 
   #output-list,
   #methods-list {
-    height: calc(100vh - (var(--header-height) * 2));
+    height: 100vh;
   }
 }
