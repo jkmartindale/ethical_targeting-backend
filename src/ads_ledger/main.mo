@@ -1,7 +1,10 @@
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Hash "mo:base/Hash";
+import Http "Http";
 import List "mo:base/List";
+import Nat "mo:base/Nat";
+import Text "mo:base/Text";
 import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
 
@@ -27,6 +30,20 @@ actor AdsLedger {
         #age75_;
     };
 
+    func ageToText(age : Age) : Text {
+        switch age {
+            case (#age0_12) "\"0-12\"";
+            case (#age13_17) "\"13-17\"";
+            case (#age18_24) "\"18-24\"";
+            case (#age25_34) "\"25-34\"";
+            case (#age35_44) "\"35-44\"";
+            case (#age45_54) "\"45-54\"";
+            case (#age55_64) "\"55-64\"";
+            case (#age65_74) "\"65-74\"";
+            case (#age75_) "\"75+\"";
+        }
+    };
+
     /// Primary gender expression to target
     ///
     /// This is obviously not an exhaustive list, but I have yet to see advertising catered to anything outside of these three categories. In most cases you shouldn't care about targeting gender anyway.
@@ -34,6 +51,14 @@ actor AdsLedger {
         #masculine;
         #non_binary;
         #feminine;
+    };
+
+    func genderToText(gender : Gender) : Text {
+        switch gender {
+            case (#masculine) "\"masculine\"";
+            case (#non_binary) "\"non_binary\"";
+            case (#feminine) "\"feminine\"";
+        }
     };
 
     /// Primary business function of an employee (corresponding to job title, not company)
@@ -65,6 +90,50 @@ actor AdsLedger {
         none : [T];
     };
 
+    /// Serialize a `MatchRules<Text>` to JSON
+    ///
+    /// TODO: Generic serialization?
+    func textRulesToJson(rules : ?MatchRules<Text>) : Text {
+        switch rules {
+            case null
+                "null";
+            case (?rules)
+                "{" #
+                    "\"all\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.all), func (text : Text) : Text {"\"" # text # "\""})) # "]," #
+                    "\"some\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.some), func (text : Text) : Text {"\"" # text # "\""})) # "]," #
+                    "\"none\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.none), func (text : Text) : Text {"\"" # text # "\""})) # "]" #
+                "}";
+        }
+    };
+
+    /// Serialize a `MatchRules<Gender>` to JSON
+    func genderRulesToJson(rules : ?MatchRules<Gender>) : Text {
+        switch rules {
+            case null
+                "null";
+            case (?rules)
+                "{" #
+                    "\"all\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.all), genderToText)) # "]," #
+                    "\"some\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.some), genderToText)) # "]," #
+                    "\"none\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.none), genderToText)) # "]" #
+                "}";
+        }
+    };
+
+    /// Serialize a `MatchRules<Age>` to JSON
+    func ageRulesToJson(rules : ?MatchRules<Age>) : Text {
+        switch rules {
+            case null
+                "null";
+            case (?rules)
+                "{" #
+                    "\"all\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.all), ageToText)) # "]," #
+                    "\"some\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.some), ageToText)) # "]," #
+                    "\"none\":[" # Text.join(",", Iter.map(Iter.fromArray(rules.none), ageToText)) # "]" #
+                "}";
+        }
+    };
+
     /// Profile attributes an ad is relevant to
     ///
     /// All attributes are optional, and non-null attributes are combined using AND, reducing the pool of candidate users to reach. For example, a Target with non-null `interests` and `dislikes` will match profiles matching the `interests` rules AND `dislikes` rules. For OR relationships, define multiple `Ad` objects.
@@ -75,6 +144,17 @@ actor AdsLedger {
         industry : ?MatchRules<Industry>;
         interests : ?MatchRules<Interest>;
         dislikes : ?MatchRules<Dislike>;
+    };
+
+    func targetToJson(target : Target) : Text {
+        "{" #
+            "\"age\":" # ageRulesToJson(target.age) # "," #
+            "\"gender\":" # genderRulesToJson(target.gender) # "," #
+            "\"occupation\":" # textRulesToJson(target.occupation) # "," #
+            "\"industry\":" # textRulesToJson(target.industry) # "," #
+            "\"interests\":" # textRulesToJson(target.interests) # "," #
+            "\"dislikes\":" # textRulesToJson(target.dislikes) #
+        "}"
     };
 
     /// Ad campaign containing `image` and `link` to be shown to users matching `profile` between `start` and `end`
@@ -92,6 +172,27 @@ actor AdsLedger {
         start : ?Time.Time;
         /// Time this campaign ends
         end : ?Time.Time;
+    };
+
+    func adToJson((id : AdID, ad : Ad)) : Text {
+        "{" #
+            "\"owner\":\"" # ad.owner # "\"," #
+            "\"id\":\"" # Nat.toText(id) # "\"," #
+            "\"image\":\"" # ad.image # "\"," #
+            "\"link\":\"" # ad.link # "\"," #
+            "\"start\":" # (switch (ad.start) {
+                case null "null";
+                case (?start) "\"" # Int.toText(start) # "\"";
+            }) # "," #
+            "\"end\":" # (switch (ad.end) {
+                case null "null";
+                case (?end) "\"" # Int.toText(end) # "\"";
+            }) # "," #
+            "\"profile\":" # (switch (ad.profile) {
+                case null "null";
+                case (?profile) targetToJson(profile);
+            }) #
+        "}"
     };
 
     /**
@@ -124,6 +225,16 @@ actor AdsLedger {
     /**
      * "API" I guess
      */
+ 
+    func allAdsJsonPrivate() : Text {
+        "[" #
+            Text.join(",", Iter.map(ads.entries(), adToJson)) #
+        "]"
+    };
+
+    public query func addAdsJson() : async Text {
+        allAdsJsonPrivate()
+    };
     
     /// Add an ad to the ledger
     ///
@@ -164,5 +275,45 @@ actor AdsLedger {
     /// Return a map of all ads in the ledger
     public query func getAds() : async List.List<(AdID, Ad)> {
         Iter.toList(ads.entries())
+    };
+
+    public query func http_request(request : Http.Request) : async Http.Response {
+        // Reject non-root paths
+        if (request.url != "/") {
+            let body = Http.textToNat8s("Not Found");
+            return {
+                status_code = 404;
+                headers = [("Content-Length", Nat.toText(body.size()))];
+                body = body;
+            }
+        };
+
+        // Reject non-GET/HEAD requests
+        // Case sensitive matching because the HTTP protocol is case-sensitive
+        // Also Motko doesn't have capitalization functions in the standard library
+        // TODO: Support HEAD?
+        if (request.method != "GET") {
+            let body = Http.textToNat8s("Method Not Allowed");
+            return {
+                status_code = 405;
+                headers = [
+                    ("Allow", "GET"),
+                    ("Content-Length", Nat.toText(body.size())),
+                ];
+                body = body;
+            }
+        };
+
+        let body = Http.textToNat8s(allAdsJsonPrivate());
+        return {
+            status_code = 200;
+            headers = [
+                ("Access-Control-Allow-Origin", "*"),
+                ("Content-Length", Nat.toText(body.size())),
+                ("Content-Type", "application/json"),
+                ("X-Content-Type-Options", "nosniff"),
+            ];
+            body = body;
+        }
     };
 }
