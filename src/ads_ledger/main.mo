@@ -4,6 +4,7 @@ import Hash "mo:base/Hash";
 import Http "Http";
 import List "mo:base/List";
 import Nat "mo:base/Nat";
+import Nat16 "mo:base/Nat16";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
@@ -157,13 +158,27 @@ actor AdsLedger {
         "}"
     };
 
+    public type Image = {
+        url : Text;
+        height : Nat16;
+        width : Nat16;
+    };
+
+    func imageToJson(image : Image) : Text {
+        "{" #
+            "\"url\":\"" # image.url # "\"," #
+            "\"height\":" # Nat16.toText(image.height) # "," #
+            "\"width\":" # Nat16.toText(image.width) #
+        "}"
+    };
+
     /// Ad campaign containing `image` and `link` to be shown to users matching `profile` between `start` and `end`
     public type Ad = {
         /// User with control over this ad
         owner : Text;
         /// Link to ad content
         /// TODO: Host blob on-chain, once Candid UI supports blob uploads
-        image : Text;
+        image : Image;
         /// URL the user should visit after clicking on the ad
         link : Text;
         /// Profile attributes this ad is relevant to, or null for no targeting
@@ -178,7 +193,7 @@ actor AdsLedger {
         "{" #
             "\"owner\":\"" # ad.owner # "\"," #
             "\"id\":\"" # Nat.toText(id) # "\"," #
-            "\"image\":\"" # ad.image # "\"," #
+            "\"image\":" # imageToJson(ad.image) # "," #
             "\"link\":\"" # ad.link # "\"," #
             "\"start\":" # (switch (ad.start) {
                 case null "null";
