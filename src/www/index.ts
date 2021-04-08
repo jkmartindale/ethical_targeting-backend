@@ -1,14 +1,12 @@
 import { fetchActor, render } from './candid';
 import { Principal } from '@dfinity/agent';
+import canisters from '../../canister_ids.json';
 
 async function main() {
-    const params = new URLSearchParams(window.location.search);
-    const cid = params.get('id');
-    if (!cid) {
-        throw new Error('Provide parameter id in the URL as the target canister id');
+    if (!canisters.ads_ledger || !canisters.ads_ledger.ic) {
+        throw new Error('Ensure canister_ids.json specifies an `ads_ledger` canister ID on the ic network');
     } else {
-        document.title = `Canister ${cid}`;
-        const canisterId = Principal.fromText(cid);
+        const canisterId = Principal.fromText(canisters.ads_ledger.ic);
         const actor = await fetchActor(canisterId);
         render(canisterId, actor);
         const app = document.getElementById('app');

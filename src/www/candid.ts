@@ -65,7 +65,6 @@ async function getRemoteDidJs(canisterId: Principal): Promise<undefined | string
 }
 
 export function render(id: Principal, canister: CanisterActor) {
-    document.getElementById('canisterId')!.innerText = `${id}`;
     const sortedMethods = Actor.interfaceOf(canister)._fields.sort(([a], [b]) => (a > b ? 1 : -1));
     for (const [name, func] of sortedMethods) {
         renderMethod(canister, name, func);
