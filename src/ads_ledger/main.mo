@@ -257,7 +257,7 @@ actor AdsLedger {
         "]"
     };
 
-    public query func addAdsJson() : async Text {
+    public query func allAdsJson() : async Text {
         allAdsJsonPrivate()
     };
     
