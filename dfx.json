@@ -4,24 +4,15 @@
       "main": "src/ads_ledger/main.mo",
       "type": "motoko"
     },
-    "didjs": {
+    "www": {
       "type": "custom",
-      "candid": "src/didjs/didjs.did",
+      "candid": "src/www/didjs.did",
       "wasm": "target/wasm32-unknown-unknown/release/didjs_opt.wasm",
       "build": [
+        "npm run build",
         "cargo build --target wasm32-unknown-unknown --release --package didjs",
         "wasm-opt --strip-debug -Oz target/wasm32-unknown-unknown/release/didjs.wasm -o target/wasm32-unknown-unknown/release/didjs_opt.wasm"
       ]
-    },
-    "www": {
-      "dependencies": ["didjs"],
-      "frontend": {
-        "entrypoint": "src/www/index.js"
-      },
-      "source": [
-        "dist/www/"
-      ],
-      "type": "assets"
     }
   },
   "networks": {
