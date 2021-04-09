@@ -3,9 +3,6 @@ import Iter "mo:base/Iter";
 import Hash "mo:base/Hash";
 import List "mo:base/List";
 import Nat "mo:base/Nat";
-import Nat16 "mo:base/Nat16";
-import Text "mo:base/Text";
-import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
 
 import Ad "Ad";
@@ -65,21 +62,21 @@ actor AdsLedger {
         let id = nextID;
         nextID += 1;
         ads.put(id, ad);
-        return id;
+        id
     };
 
     /// Delete an ad from the ledger
     ///
     /// @return The Ad that was just deleted, or null if it didn't exist
     public func delete(id : Ad.ID) : async ?Ad.Ad {
-        return ads.remove(id);
+        ads.remove(id)
     };
 
     /// Get an ad from the ledger
     ///
     /// @return The Ad with the corresponding ID, or null if it doesn't exist
     public func get(id : Ad.ID) : async ?Ad.Ad {
-        return ads.get(id);
+        ads.get(id)
     };
 
     /// Replace (update) an ad in the ledger
@@ -88,7 +85,7 @@ actor AdsLedger {
     /// @return Previous Ad existing at that ID, or null if that ID isn't in use
     public func replace(id : Ad.ID, newAd : Ad.Ad) : async ?Ad.Ad {
         // Make sure ID is in use to avoid inserting ads at Ids the ID generator doesn't know about
-        return switch (ads.get(id)) {
+        switch (ads.get(id)) {
             case (?oldAd) ads.replace(id, newAd);
             case null null;
         }

@@ -2,7 +2,6 @@ import Char "mo:base/Char";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
 import Nat32 "mo:base/Nat32";
-import Prim "mo:prim";
 
 /// Web server for the ad ledger, based on the (currently undocumented) HTTP API exposed to canisters
 ///
