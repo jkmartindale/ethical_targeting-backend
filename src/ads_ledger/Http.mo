@@ -3,18 +3,16 @@ import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
 import Nat32 "mo:base/Nat32";
 
-/// Web server for the ad ledger, based on the (currently undocumented) HTTP API exposed to canisters
+/// Objects used in the (currently undocumented) HTTP API exposed to canisters
 ///
-/// Warning: this code was written while tired and angry!
+/// In the future these types will probably use `Blob` instead of `[Nat8]`.
+/// The two types are equivalent in Candid, but Motoko's `Blob` is more efficient.
+/// Unfortuantely it's also more unfinished, and lacks an easy way to be created from arbitrary `Text`.
 module {
     /// 2-tuple of HTTP header name and value
-    ///
-    /// Based on unreleased didjs Rust crate.
     public type HeaderField = (Text, Text);
 
     /// HTTP Request record
-    ///
-    /// Based on unreleased didjs Rust crate. Motoko's `Blob` primitive hardly even exists, so it's been replaced with `[Nat8]` (equivalent as far as Candid is concerned).
     public type Request = {
         method : Text;
         url : Text;
@@ -23,17 +21,13 @@ module {
     };
 
     /// HTTP Request record
-    ///
-    /// Based on unreleased didjs Rust crate. Motoko's `Blob` is unfinished garbage, so it's been replaced with `[Nat8]` (equivalent as far as Candid is concerned).
     public type Response = {
         status_code : Nat16;
         headers : [HeaderField];
         body : [Nat8];
     };
 
-    /// Convert a Text string to `[Nat8]` (useful for `Response` body encoding)
-    ///
-    /// DFINITY, why did you make me do this? I hate you. "Your new favorite language" was a lie!
+    /// Convert a `Text` string to `[Nat8]` (useful for `Response` body encoding)
     public func textToNat8s(text : Text) : [Nat8] {
         Iter.toArray(Iter.map(text.chars(), func (char : Char) : Nat8 {
             Nat8.fromNat(Nat32.toNat(Char.toNat32(char)))
